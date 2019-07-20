@@ -14,6 +14,11 @@
     background:linear-gradient(rgb(70, 158, 240),rgb(34, 115, 129));
     color:#f1f1f1;
 }
+#data h3{
+    font-size: 20px;
+    background:rgb(96, 132, 167);
+    color:#f1f1f1;
+}
 .element{
     border:1px solid rgba(153, 0, 204, 0.24);
     padding:10px;
@@ -27,7 +32,7 @@
 }
 .my-btn{
     background-color: rgb(70, 158, 240);
-    color:#dad8d8;
+    color:#f1f1f1;
 }
 #data p{
     word-break: break-all;
