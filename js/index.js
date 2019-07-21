@@ -7,6 +7,7 @@ $("#submit").click(function(){ //if clicked more than once clear the page then p
         $(".row").html(" ")
     } 
 //https://ghibliapi.herokuapp.com/films
+//https://jsonplaceholder.typicode.com/users
 request.open('GET', ''+url.val()+'', true)
 request.onload = function () {
     var data = JSON.parse(this.response)
@@ -16,10 +17,12 @@ request.onload = function () {
             data = data.articles
         }
         var dataArr = []
-        /*so the function does the following: it makes 2 arrays and a map, first and parent arr is the dataArr,
+        /*so the function(shownInArr) does the following: it makes 2 arrays and a maparr, first and parent arr is the dataArr,
          the second for prop loop has a temp array that stores the 12(n of props) maps of keys and values. in the end of the loop it pushes all the 
          properties mapped to another array in the first for element loop then this array gets pushed in the original daraArr.
          so it becomes: dataArr has (n of elements) arrays that has (n of props) mapped array */
+        showInArr(data)
+        recur(dataArr)
         function showInArr(data){
             for(element in data){
                 var keys = Object.keys(data[element])
@@ -34,39 +37,47 @@ request.onload = function () {
                 dataArr.push(elementTempArr)
             }               
         }
-        showInArr(data)
-        //the following code sucks..
-       for(ele in dataArr){ //loops through the whole array of data
-           for(pro of dataArr[ele]){ // loops through arrays that contain the keys and values(that are now values in arrays!)
-               for(i in pro){ // loops thro each key and value
-                   if(pro[i] instanceof(Object)){ //checks if either is an object
-                       var parentArr = []
-                       for(j in Object.keys(pro[i])){
-                           var temArr = [] 
-                           temArr.push(Object.keys(pro[i])[j],Object.values(pro[i])[j]) //breaks that object and put the keys and vals in the temp array
-                           parentArr.push(temArr) //then stores these arrays in a parent array
-                       }
-                       pro[i] = parentArr //changes the obj to an array of the same data.
-                   }
-               }
-           }
-       } 
-       $(".element").each(function(j){
-        for(let i = 0; i < dataArr[j].length; i++){
-            if(dataArr[j][i][1] instanceof(Array)){
-                $('<h2 class="key">'+dataArr[j][i][0]+':</h2><div class="ele text-center"></div>').appendTo($(this));
-                    for(key of dataArr[j][i][1]){
-                        $('<h3 class="key">'+key[0]+'</h3><p class="val">'+key[1]+'</p>').appendTo($('.ele',this))
+        function recur(data){
+            for(ele of data){
+                for(prop of ele){
+                    for(i in prop){//i will be just 0 and 1, cuz key and value
+                        if(prop[i] instanceof(Object) == false){
+                        }
+                        else if(prop[i] instanceof(Object)){
+                    //     console.log("yep",prop[i])
+                        //  console.log("true obj",prop[0],prop[1]) //put them in a temp array
+                            var parentArr = []
+                            var secArr= []
+                            for(j in Object.keys(prop[i])){
+                                var tempArr = [] //to store the object props temproraly
+                                tempArr.push(Object.keys(prop[i])[j],Object.values(prop[i])[j])  
+                                secArr.push(tempArr)
+                            }
+                            parentArr.push(secArr)
+                            prop[i] = parentArr
+                        //   console.log("pA=>",parentArr)
+                            recur(parentArr)
+                        } 
                     }
+                }
+            }
+        }
+       $(".element").each(function(j){ //dataArr[j] is the element
+        for(prop of dataArr[j]){
+            if(prop[1] instanceof(Array)){
+                $('<h2 class="key">'+prop[0]+'</h2><div class="ele text-center"></div>').appendTo($(this));
+                for(ele in prop[1]){
+                    for(value of prop[1][ele]){
+                        $('<h3 class="key">'+value[0]+'</h3><p class="val">'+value[1]+'</p>').appendTo($('.ele',this))   
+                    }                
+                }
             }
             else{
-                let keyName = dataArr[j][i][0]
-                let valueName = dataArr[j][i][1];
-                if(keyName.includes("image") || keyName.includes("img") || keyName.includes("Img") || keyName.includes("Image")){
-                    $('<h2 class="key">'+keyName+':</h2><img class="val img-fluid" src="'+valueName+'">').appendTo($(this));
+                if(prop[0].includes("image") || prop[0].includes("img") || prop[0].includes("Img") || prop[0].includes("Image")){
+                    $('<h2 class="key">'+prop[0]+':</h2><img class="val img-fluid" src="'+prop[1]+'">').appendTo($(this));
                 }
                 else{
-                    $('<h2 class="key">'+keyName+':</h2><p class="val">'+valueName+'</p>').appendTo($(this));
+                    $('<h2 class="key">'+prop[0]+':</h2><p class="val">'+prop[1]+'</p>').appendTo($(this));
                 }
             }
         }
@@ -79,5 +90,4 @@ request.onload = function () {
 request.send()
     let aHref = $("#data");
     $("body").animate({scrollTop:$(aHref).offset().top},1000)
- })
- 
+})
